@@ -467,7 +467,17 @@ export default function App() {
     } else if (activeCategory) {
       setActiveCategory(null);
     } else {
-      window.location.href = "https://webapp.iedcsummit.in/";
+      const fallback = () => { window.location.href = "https://webapp.iedcsummit.in/"; };
+      if (document.referrer) {
+        // Skip our popstate sentinel + this app entry to reach the previous page
+        let left = false;
+        window.addEventListener("pagehide", () => { left = true; }, { once: true });
+        window.history.go(-2);
+        // If nothing happened (e.g. opened in a new tab with a referrer), redirect
+        setTimeout(() => { if (!left && document.visibilityState === "visible") fallback(); }, 400);
+      } else {
+        fallback();
+      }
     }
   };
 
